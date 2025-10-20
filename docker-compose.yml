@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: license_server_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    ports:
+      # Map container port 8000 to host port 8000
+      - "8000:8000"
+    volumes:
+      # 掛載原始碼目錄以支援熱重載
+      - ./backend/app:/app/app
+      - ./backend/requirements.txt:/app/requirements.txt
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: license_server_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    env_file:
+      - ./frontend/.env
+    ports:
+      # Map container port 5173 to host port 5173 for Vite dev server
+      - "5173:5173"
+    volumes:
+      # 掛載原始碼目錄以支援熱重載
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.js:/app/vite.config.js
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/package-lock.json:/app/package-lock.json
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+volumes:
+  mariadb_data:
+    driver: local

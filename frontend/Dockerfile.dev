@@ -1,0 +1,23 @@
+# 開發環境 Dockerfile for React Frontend
+FROM node:20-alpine
+
+# 設定工作目錄
+WORKDIR /app
+
+# 複製 package.json 和 package-lock.json
+COPY package*.json ./
+
+# 安裝依賴並清理快取
+RUN npm install --frozen-lockfile && npm cache clean --force
+
+# 複製應用程式碼
+COPY . .
+
+# 清理 Vite 快取以確保重新建置
+RUN rm -rf node_modules/.vite
+
+# 暴露 Vite 開發伺服器端口
+EXPOSE 5173
+
+# 啟動 Vite 開發伺服器，支援熱重載
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]

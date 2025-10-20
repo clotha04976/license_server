@@ -1,0 +1,86 @@
+
+# ----------------------------------------------------
+# 1. 通用檔案/作業系統/編輯器 忽略 (Common/System Ignores)
+# ----------------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+
+# ----------------------------------------------------
+# 2. 環境變數和設定檔 (Environment/Config)
+# ----------------------------------------------------
+# 永遠忽略環境變數檔案，因為它們包含敏感資訊
+.env
+.env.*
+.flaskenv
+
+# ----------------------------------------------------
+# 3. 後端 (Backend - FastAPI/Python) 忽略
+# ----------------------------------------------------
+
+# 虛擬環境資料夾 (Virtual Environments)
+/backend/venv
+/backend/.venv
+pip-log.txt
+
+# 編譯後的位元組碼 (Byte-compiled files)
+*.pyc
+__pycache__
+*.$py.class
+
+# IDE 和工具相關
+.mypy_cache/
+.pytest_cache/
+.tox/
+dist/
+build/
+*.egg-info
+
+# 資料庫或使用者上傳的資料（如果放在專案目錄內）
+# /backend/db.sqlite3
+# /backend/media/
+
+# ----------------------------------------------------
+# 4. 前端 (Frontend - ReactJS/Node) 忽略
+# ----------------------------------------------------
+
+# Node 模組
+/frontend/node_modules
+
+# 建構輸出資料夾 (Build outputs)
+/frontend/build
+/frontend/dist
+/frontend/out
+/frontend/dist-ssr
+
+# 測試覆蓋率報告
+/frontend/coverage
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 其他 Node 工具的快取
+.npm
+.eslintcache

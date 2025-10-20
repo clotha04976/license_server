@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+pymysql
+pydantic[email]
+python-dotenv
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.0.0,<5.0.0
+python-jose[cryptography]
+python-multipart
+apscheduler>=3.11.0
+pydantic-settings
+slowapi==0.1.9
