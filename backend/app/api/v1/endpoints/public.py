@@ -112,16 +112,18 @@ async def activate_license(
             from sqlalchemy import or_
             existing_activation = query.filter(or_(*conditions)).first()
             
-            # 如果找到匹配的硬體ID，更新機器碼
+            # 如果找到匹配的硬體ID，更新機器碼和IP地址
             if existing_activation:
                 existing_activation.machine_code = activation_in.machine_code
-                print(f"Updated machine code for license {license_obj.serial_number} due to hardware match")
+                existing_activation.ip_address = get_real_ip(request)
+                print(f"Updated machine code and IP for license {license_obj.serial_number} due to hardware match")
 
     if not existing_activation:
         # 建立新的啟用記錄，包含硬體ID資訊
         activation_create_data = {
             "license_id": license_obj.id,
-            "machine_code": activation_in.machine_code
+            "machine_code": activation_in.machine_code,
+            "ip_address": get_real_ip(request)
         }
         
         # 添加硬體ID資訊（包括 None 值以明確標記不存在的硬體）
@@ -173,7 +175,8 @@ async def activate_license(
         update_data = {
             "keypro_id": activation_in.keypro_id,
             "motherboard_id": activation_in.motherboard_id,
-            "disk_id": activation_in.disk_id
+            "disk_id": activation_in.disk_id,
+            "ip_address": get_real_ip(request)
         }
         crud.activation.update(db, db_obj=existing_activation, obj_in=update_data)
         
