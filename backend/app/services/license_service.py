@@ -72,7 +72,7 @@ def _encrypt_license_data(license_data: dict) -> bytes:
     
     return base64.b64encode(iv + encrypted_data)
 
-def generate_license_file_content(license_obj: License, machine_code: str, hardware_ids: dict = None) -> bytes:
+def generate_license_file_content(license_obj: License, machine_code: str, hardware_ids: dict = None, app_version: str = None) -> bytes:
     """
     Generates the final encrypted and signed .lic file content.
     """
@@ -91,6 +91,10 @@ def generate_license_file_content(license_obj: License, machine_code: str, hardw
     # 添加硬體ID資訊（如果提供）
     if hardware_ids:
         license_data["hardware_ids"] = hardware_ids
+    
+    # 添加應用程式版本資訊（如果提供）
+    if app_version:
+        license_data["app_version"] = app_version
     
     # 2. Sign the data
     signature = _sign_license_data(license_data)

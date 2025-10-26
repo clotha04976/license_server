@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Body
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional
@@ -46,7 +46,7 @@ async def activate_license(
     Activate a license with a serial number and machine code.
     """
     print(await request.body())
-    license_obj = db.query(models.License).filter(models.License.serial_number == activation_in.serial_number).first()
+    license_obj = db.query(models.License).options(joinedload(models.License.customer)).filter(models.License.serial_number == activation_in.serial_number).first()
     if not license_obj:
         raise HTTPException(status_code=404, detail="Serial number not found.")
 
@@ -275,7 +275,11 @@ async def activate_license(
             app_version=activation_in.app_version
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate license file")
+        import traceback
+        error_detail = f"Failed to generate license file: {str(e)}"
+        print(f"License generation error: {error_detail}")
+        print(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=error_detail)
 
     return {
         "status": "success", 
@@ -294,7 +298,7 @@ async def deactivate_license(
     Deactivate a license for a specific machine.
     """
     print(await request.body())
-    license_obj = db.query(models.License).filter(models.License.serial_number == activation_in.serial_number).first()
+    license_obj = db.query(models.License).options(joinedload(models.License.customer)).filter(models.License.serial_number == activation_in.serial_number).first()
     if not license_obj:
         raise HTTPException(status_code=404, detail="Serial number not found.")
 
@@ -334,7 +338,7 @@ async def validate_license(
     Validate an existing activation and get the latest license file.
     """
     print(await request.body())
-    license_obj = db.query(models.License).filter(models.License.serial_number == activation_in.serial_number).first()
+    license_obj = db.query(models.License).options(joinedload(models.License.customer)).filter(models.License.serial_number == activation_in.serial_number).first()
     if not license_obj:
         raise HTTPException(status_code=404, detail="Serial number not found.")
 
