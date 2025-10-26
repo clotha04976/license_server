@@ -1,8 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.endpoints import auth, customers, products, features, admin
+from app.core.rate_limiter import limiter
+from slowapi.middleware import SlowAPIMiddleware
 
 internal_app = FastAPI()
+
+# 加入速率限制 middleware
+internal_app.state.limiter = limiter
+internal_app.add_middleware(SlowAPIMiddleware)
 
 # 僅允許特定來源（如內網前端）
 internal_app.add_middleware(
@@ -13,8 +19,8 @@ internal_app.add_middleware(
         "https://ducky.shinping.synology.me"
     ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],  # 限制允許的 HTTP 方法
+    allow_headers=["Authorization", "Content-Type"],  # 限制允許的標頭
 )
 
 internal_app.include_router(auth.router, prefix="/auth", tags=["Auth"])

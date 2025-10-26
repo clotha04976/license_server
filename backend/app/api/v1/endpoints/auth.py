@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
@@ -11,11 +11,13 @@ from .... import schemas, crud
 from ....core import security
 from ....core.config import settings
 from ....core.dependencies import get_db
+from ....core.rate_limiter import limiter
 
 router = APIRouter()
 
 @router.post("/login", response_model=schemas.Token)
-def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
+@limiter.limit("5/minute")  # 限制每分鐘最多 5 次登入嘗試
+def login_for_access_token(request: Request, db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     """
     OAuth2 compatible token login, get an access token for future requests.
     """

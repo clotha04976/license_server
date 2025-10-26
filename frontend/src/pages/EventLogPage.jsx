@@ -118,7 +118,20 @@ function EventLogPage() {
   const formatDateTime = (dateTime) => {
     if (!dateTime) return '無';
     
-    const date = new Date(dateTime);
+    // 確保時間字串被正確解析為 UTC 時間
+    let date;
+    if (typeof dateTime === 'string') {
+      // 如果字串沒有時區資訊，假設它是 UTC 時間
+      if (!dateTime.includes('Z') && !dateTime.includes('+') && !dateTime.includes('-', 10)) {
+        date = new Date(dateTime + 'Z');
+      } else {
+        date = new Date(dateTime);
+      }
+    } else {
+      date = new Date(dateTime);
+    }
+    
+    // 轉換為台北時間
     return date.toLocaleString('zh-TW', {
       timeZone: 'Asia/Taipei',
       year: 'numeric',
@@ -168,10 +181,17 @@ function EventLogPage() {
       validation: '驗證',
       deactivation: '停用',
     };
+    const colorMap = {
+      activation: 'primary',
+      re_activation: 'warning',
+      hardware_change: 'danger',
+      validation: 'success',
+      deactivation: 'default',
+    };
     return (
       <Chip
         label={typeMap[eventType] || eventType}
-        color="primary"
+        color={colorMap[eventType] || 'default'}
         variant="outlined"
         size="small"
       />

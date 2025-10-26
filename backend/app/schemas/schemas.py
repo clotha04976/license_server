@@ -38,6 +38,7 @@ class ActivationBase(BaseModel):
     keypro_id: Optional[str] = None
     motherboard_id: Optional[str] = None
     disk_id: Optional[str] = None
+    app_version: Optional[str] = None
 
 # --- Create Schemas ---
 

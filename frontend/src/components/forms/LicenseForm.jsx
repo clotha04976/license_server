@@ -19,6 +19,7 @@ import {
   Divider,
   Typography,
   Box,
+  Autocomplete,
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
@@ -53,6 +54,8 @@ function LicenseForm({ open, onClose, onSave, license }) {
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [initialMachineCode, setInitialMachineCode] = useState('');
+  const [customerInputValue, setCustomerInputValue] = useState('');
+  const [customerLoading, setCustomerLoading] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -74,6 +77,8 @@ function LicenseForm({ open, onClose, onSave, license }) {
         connection_type: license.connection_type || 'network',
         notes: license.notes || '',
       });
+      // 設定 autocomplete 的顯示值
+      setCustomerInputValue(license.customer.name || '');
     } else {
       setFormData({
         customer_id: '',
@@ -85,6 +90,7 @@ function LicenseForm({ open, onClose, onSave, license }) {
         connection_type: 'network',
         notes: '',
       });
+      setCustomerInputValue('');
     }
   }, [license, open]);
 
@@ -98,6 +104,39 @@ function LicenseForm({ open, onClose, onSave, license }) {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCustomerChange = (event, newValue) => {
+    if (newValue) {
+      setFormData((prev) => ({ ...prev, customer_id: newValue.id }));
+      setCustomerInputValue(newValue.name);
+    } else {
+      setFormData((prev) => ({ ...prev, customer_id: '' }));
+      setCustomerInputValue('');
+    }
+  };
+
+  const handleCustomerInputChange = (event, newInputValue) => {
+    setCustomerInputValue(newInputValue);
+    
+    // 當輸入值改變時，搜尋客戶
+    if (newInputValue && newInputValue.length > 0) {
+      setCustomerLoading(true);
+      customerService.getCustomers({ search: newInputValue, limit: 50 })
+        .then(res => {
+          setCustomers(res.data.items || res.data);
+          setCustomerLoading(false);
+        })
+        .catch(() => {
+          setCustomerLoading(false);
+        });
+    } else {
+      // 如果輸入為空，載入所有客戶
+      customerService.getCustomers({ limit: 100 })
+        .then(res => {
+          setCustomers(res.data.items || res.data);
+        });
+    }
   };
 
   const handleFeatureChange = (event) => {
@@ -175,19 +214,56 @@ function LicenseForm({ open, onClose, onSave, license }) {
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{license ? '編輯授權' : '新增授權'}</DialogTitle>
       <DialogContent>
-        <FormControl fullWidth margin="dense" required>
-          <InputLabel id="customer-select-label">客戶</InputLabel>
-          <Select
-            labelId="customer-select-label"
-            name="customer_id"
-            value={formData.customer_id}
-            label="客戶"
-            onChange={handleChange}
-            disabled={!!license}
-          >
-            {customers.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
-          </Select>
-        </FormControl>
+        <Autocomplete
+          fullWidth
+          margin="dense"
+          options={customers}
+          getOptionLabel={(option) => option.name || ''}
+          value={customers.find(c => c.id === formData.customer_id) || null}
+          inputValue={customerInputValue}
+          onInputChange={handleCustomerInputChange}
+          onChange={handleCustomerChange}
+          disabled={!!license}
+          loading={customerLoading}
+          freeSolo={false}
+          selectOnFocus
+          clearOnBlur
+          handleHomeEndKeys
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="客戶"
+              required
+              margin="dense"
+              placeholder="輸入客戶名稱進行搜尋..."
+            />
+          )}
+          renderOption={(props, option) => (
+            <Box component="li" {...props}>
+              <Box>
+                <Typography variant="body1">{option.name}</Typography>
+                {option.email && (
+                  <Typography variant="body2" color="text.secondary">
+                    {option.email}
+                  </Typography>
+                )}
+                {option.phone && (
+                  <Typography variant="body2" color="text.secondary">
+                    電話: {option.phone}
+                  </Typography>
+                )}
+                {option.tax_id && (
+                  <Typography variant="body2" color="text.secondary">
+                    統編: {option.tax_id}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          )}
+          noOptionsText="找不到客戶，請嘗試其他關鍵字"
+          loadingText="搜尋中..."
+          filterOptions={(options) => options} // 禁用本地過濾，使用伺服器端搜尋
+        />
         <FormControl fullWidth margin="dense" required>
           <InputLabel id="product-select-label">產品</InputLabel>
           <Select

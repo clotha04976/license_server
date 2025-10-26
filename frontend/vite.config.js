@@ -39,6 +39,11 @@ export default defineConfig({
   server: {
     host: '0.0.0.0', // 允許外部訪問
     port: 5173,
+    allowedHosts: [
+      'lic.shinping.synology.me', // 允許您的網址
+      'localhost',                // (可選) 確保本地連線也允許
+      '192.168.1.133'             // (可選) 確保 NAS IP 連線也允許
+    ],
     watch: {
       usePolling: true, // 在 Docker 容器中使用輪詢監聽檔案變化
     },

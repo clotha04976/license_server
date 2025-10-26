@@ -156,20 +156,76 @@ function EventDialog({ open, onClose, licenseId, licenseSerialNumber }) {
     return subtypeText ? `${typeText} - ${subtypeText}` : typeText;
   };
 
+  const formatDateTime = (dateTime) => {
+    if (!dateTime) return '無';
+    
+    // 確保時間字串被正確解析為 UTC 時間
+    let date;
+    if (typeof dateTime === 'string') {
+      // 如果字串沒有時區資訊，假設它是 UTC 時間
+      if (!dateTime.includes('Z') && !dateTime.includes('+') && !dateTime.includes('-', 10)) {
+        date = new Date(dateTime + 'Z');
+      } else {
+        date = new Date(dateTime);
+      }
+    } else {
+      date = new Date(dateTime);
+    }
+    
+    // 轉換為台北時間
+    return date.toLocaleString('zh-TW', {
+      timeZone: 'Asia/Taipei',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+  };
+
   const formatDetails = (details) => {
     if (!details) return '無';
     
+    const info = [];
+    
+    // 顯示機器碼變化
+    if (details.machine_code_updated !== undefined) {
+      info.push(`機器碼更新: ${details.machine_code_updated ? '是' : '否'}`);
+    }
+    
+    // 顯示硬體更新
+    if (details.hardware_updated !== undefined) {
+      info.push(`硬體更新: ${details.hardware_updated ? '是' : '否'}`);
+    }
+    
+    // 顯示硬體變化詳細資訊
     if (details.hardware_changes) {
       const changes = [];
       Object.entries(details.hardware_changes).forEach(([key, value]) => {
         if (value.old !== value.new) {
-          changes.push(`${key}: ${value.old || '無'} → ${value.new || '無'}`);
+          const oldValue = value.old ? value.old.substring(0, 8) + '...' : '無';
+          const newValue = value.new ? value.new.substring(0, 8) + '...' : '無';
+          changes.push(`${key}: ${oldValue} → ${newValue}`);
         }
       });
-      return changes.length > 0 ? changes.join(', ') : '無變化';
+      if (changes.length > 0) {
+        info.push(`硬體變化: ${changes.join(', ')}`);
+      }
     }
     
-    return JSON.stringify(details, null, 2);
+    // 如果有其他詳細資訊，也顯示出來
+    const otherDetails = { ...details };
+    delete otherDetails.machine_code_updated;
+    delete otherDetails.hardware_updated;
+    delete otherDetails.hardware_changes;
+    
+    if (Object.keys(otherDetails).length > 0) {
+      info.push(`其他: ${JSON.stringify(otherDetails, null, 2)}`);
+    }
+    
+    return info.length > 0 ? info.join('\n') : '無變化';
   };
 
   return (
@@ -245,7 +301,7 @@ function EventDialog({ open, onClose, licenseId, licenseSerialNumber }) {
                         />
                       </TableCell>
                       <TableCell>
-                        {new Date(event.created_at).toLocaleString()}
+                        {formatDateTime(event.created_at)}
                       </TableCell>
                       <TableCell>
                         {getEventTypeText(event.event_type, event.event_subtype)}
@@ -261,7 +317,7 @@ function EventDialog({ open, onClose, licenseId, licenseSerialNumber }) {
                         </Box>
                       </TableCell>
                       <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                        {event.machine_code || '無'}
+                        {event.machine_code ? event.machine_code.substring(0, 16) + (event.machine_code.length > 16 ? '...' : '') : '無'}
                       </TableCell>
                       <TableCell>
                         {event.ip_address || '無'}

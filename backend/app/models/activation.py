@@ -21,5 +21,8 @@ class Activation(Base):
     keypro_id = Column(String(255), nullable=True, index=True)
     motherboard_id = Column(String(255), nullable=True, index=True)
     disk_id = Column(String(255), nullable=True, index=True)
+    
+    # 應用程式版本資訊
+    app_version = Column(String(50), nullable=True)
 
     license = relationship("License", back_populates="activations")
