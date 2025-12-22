@@ -25,6 +25,7 @@ import KeyIcon from '@mui/icons-material/Key';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import ExtensionIcon from '@mui/icons-material/Extension';
 import HistoryIcon from '@mui/icons-material/History';
+import DescriptionIcon from '@mui/icons-material/Description';
 import useAuth from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
@@ -38,6 +39,7 @@ const menuItems = [
   { text: '產品', icon: <InventoryIcon />, path: '/products' },
   { text: '功能', icon: <ExtensionIcon />, path: '/features' },
   { text: '紀錄', icon: <HistoryIcon />, path: '/event-logs' },
+  { text: 'Log 檔案', icon: <DescriptionIcon />, path: '/logs' },
 ];
 
 function AppLayout() {

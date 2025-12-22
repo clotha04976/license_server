@@ -69,6 +69,8 @@ class ProductUpdate(ProductBase):
     pass
 
 class LicenseUpdate(BaseModel):
+    customer_id: Optional[int] = None
+    product_id: Optional[int] = None
     features: Optional[List[str]] = []
     expires_at: Optional[datetime] = None
     max_activations: Optional[int] = None
@@ -162,6 +164,32 @@ class LicenseSearchParams(BaseModel):
 
 class LicenseSearchResponse(BaseModel):
     items: List[License]
+    total: int
+    page: int
+    limit: int
+    total_pages: int
+
+# --- Log Schemas ---
+
+class LogFileInfo(BaseModel):
+    filename: str
+    file_size: int
+    uploaded_at: datetime
+    serial_number: str
+    customer_id: Optional[int] = None
+    customer_name: Optional[str] = None
+    customer_tax_id: Optional[str] = None
+    batch_id: Optional[str] = None  # 批次 ID（同一時間上傳的檔案共用同一個批次 ID）
+    problem_description: Optional[str] = None  # 問題描述
+
+class LogUploadResponse(BaseModel):
+    status: str
+    message: str
+    uploaded_files: List[str] = []
+    failed_files: List[str] = []
+
+class LogListResponse(BaseModel):
+    items: List[LogFileInfo]
     total: int
     page: int
     limit: int

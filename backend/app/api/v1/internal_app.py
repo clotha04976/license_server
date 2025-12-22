@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.endpoints import auth, customers, products, features, admin
+from app.api.v1.endpoints.logs import internal_router as logs_internal_router
 from app.core.rate_limiter import limiter
 from slowapi.middleware import SlowAPIMiddleware
 
@@ -28,3 +29,4 @@ internal_app.include_router(customers.router, prefix="/customers", tags=["Custom
 internal_app.include_router(products.router, prefix="/products", tags=["Products"])
 internal_app.include_router(features.router, prefix="/features", tags=["Features"])
 internal_app.include_router(admin.router, prefix="/admin", tags=["Admin"])  # 👉 加上 /admin
+internal_app.include_router(logs_internal_router, prefix="/logs", tags=["Logs"])

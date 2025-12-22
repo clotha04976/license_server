@@ -9,6 +9,7 @@ import ProductsPage from '../pages/ProductsPage';
 import LicensesPage from '../pages/LicensesPage';
 import FeaturesPage from '../pages/FeaturesPage';
 import EventLogPage from '../pages/EventLogPage';
+import LogsPage from '../pages/LogsPage';
 
 function AppRouter() {
   return (
@@ -24,6 +25,7 @@ function AppRouter() {
             <Route path="products" element={<ProductsPage />} />
             <Route path="features" element={<FeaturesPage />} />
             <Route path="event-logs" element={<EventLogPage />} />
+            <Route path="logs" element={<LogsPage />} />
           </Route>
         </Route>
       </Routes>

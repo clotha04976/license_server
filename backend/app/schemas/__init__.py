@@ -7,6 +7,7 @@ from .schemas import (
     Activation, ActivationCreate,
     Feature, FeatureCreate, FeatureUpdate,
     CustomerSearchParams, CustomerSearchResponse,
-    LicenseSearchParams, LicenseSearchResponse
+    LicenseSearchParams, LicenseSearchResponse,
+    LogFileInfo, LogUploadResponse, LogListResponse
 )
 from .event_log import EventLog, EventLogCreate, EventLogUpdate, EventConfirmationRequest
