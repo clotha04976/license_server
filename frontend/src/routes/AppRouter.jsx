@@ -10,6 +10,7 @@ import LicensesPage from '../pages/LicensesPage';
 import FeaturesPage from '../pages/FeaturesPage';
 import EventLogPage from '../pages/EventLogPage';
 import LogsPage from '../pages/LogsPage';
+import TrainingDataPage from '../pages/TrainingDataPage';
 
 function AppRouter() {
   return (
@@ -26,6 +27,7 @@ function AppRouter() {
             <Route path="features" element={<FeaturesPage />} />
             <Route path="event-logs" element={<EventLogPage />} />
             <Route path="logs" element={<LogsPage />} />
+            <Route path="training-data" element={<TrainingDataPage />} />
           </Route>
         </Route>
       </Routes>

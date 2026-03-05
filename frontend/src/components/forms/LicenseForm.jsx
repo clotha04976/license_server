@@ -223,7 +223,6 @@ function LicenseForm({ open, onClose, onSave, license }) {
           inputValue={customerInputValue}
           onInputChange={handleCustomerInputChange}
           onChange={handleCustomerChange}
-          disabled={!!license}
           loading={customerLoading}
           freeSolo={false}
           selectOnFocus
@@ -272,7 +271,6 @@ function LicenseForm({ open, onClose, onSave, license }) {
             value={formData.product_id}
             label="產品"
             onChange={handleChange}
-            disabled={!!license}
           >
             {products.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
           </Select>

@@ -95,6 +95,19 @@ def update_license(
     license = crud.license.get(db=db, id=license_id)
     if not license:
         raise HTTPException(status_code=404, detail="License not found")
+    
+    # Validate customer_id if provided
+    if license_in.customer_id is not None:
+        customer = crud.customer.get(db=db, id=license_in.customer_id)
+        if not customer:
+            raise HTTPException(status_code=404, detail=f"Customer with id {license_in.customer_id} not found")
+    
+    # Validate product_id if provided
+    if license_in.product_id is not None:
+        product = crud.product.get(db=db, id=license_in.product_id)
+        if not product:
+            raise HTTPException(status_code=404, detail=f"Product with id {license_in.product_id} not found")
+    
     license = crud.license.update(db=db, db_obj=license, obj_in=license_in)
     return license
 

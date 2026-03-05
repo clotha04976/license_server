@@ -32,6 +32,7 @@ function CustomersPage() {
   const [customers, setCustomers] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [formError, setFormError] = useState(null);
   
   // 搜尋和分頁狀態
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,15 +84,18 @@ function CustomersPage() {
   const handleOpenForm = (customer = null) => {
     setSelectedCustomer(customer);
     setIsFormOpen(true);
+    setFormError(null); // 打開表單時清除錯誤
   };
 
   const handleCloseForm = () => {
     setSelectedCustomer(null);
     setIsFormOpen(false);
+    setFormError(null); // 關閉表單時清除錯誤
   };
 
   const handleSave = async (formData) => {
     try {
+      setFormError(null); // 清除之前的錯誤
       if (selectedCustomer) {
         await customerService.updateCustomer(selectedCustomer.id, formData);
       } else {
@@ -101,6 +105,25 @@ function CustomersPage() {
       handleCloseForm();
     } catch (error) {
       console.error('Failed to save customer:', error);
+      // 從錯誤回應中提取錯誤訊息
+      let errorMessage = '儲存客戶時發生錯誤，請稍後再試。';
+      
+      if (error.response && error.response.data) {
+        // FastAPI 錯誤回應格式：{ detail: "錯誤訊息" }
+        if (error.response.data.detail) {
+          errorMessage = error.response.data.detail;
+        } else if (error.response.data.message) {
+          errorMessage = error.response.data.message;
+        } else if (typeof error.response.data === 'string') {
+          errorMessage = error.response.data;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setFormError(errorMessage);
+      // 拋出錯誤，讓表單組件知道有錯誤發生
+      throw error;
     }
   };
 
@@ -304,6 +327,7 @@ function CustomersPage() {
         onClose={handleCloseForm}
         onSave={handleSave}
         customer={selectedCustomer}
+        error={formError}
       />
     </Box>
   );

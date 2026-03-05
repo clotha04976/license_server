@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from sqlalchemy.orm import joinedload
 from .... import crud, models, schemas
@@ -18,8 +19,38 @@ def create_customer(
     """
     Create new customer.
     """
-    customer = crud.customer.create(db=db, obj_in=customer_in)
-    return customer
+    try:
+        customer = crud.customer.create(db=db, obj_in=customer_in)
+        return customer
+    except IntegrityError as e:
+        db.rollback()
+        error_msg = str(e.orig)
+        
+        # 處理重複的客戶編號
+        if 'tax_id' in error_msg or 'customers.tax_id' in error_msg:
+            raise HTTPException(
+                status_code=400,
+                detail=f"客戶編號 '{customer_in.tax_id}' 已存在，請使用其他編號。"
+            )
+        
+        # 處理重複的 email
+        if 'email' in error_msg or 'customers.email' in error_msg:
+            raise HTTPException(
+                status_code=400,
+                detail=f"電子郵件 '{customer_in.email}' 已被使用，請使用其他電子郵件。"
+            )
+        
+        # 其他完整性錯誤
+        raise HTTPException(
+            status_code=400,
+            detail="建立客戶時發生錯誤，可能是資料重複或格式不正確。"
+        )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"建立客戶時發生錯誤：{str(e)}"
+        )
 
 @router.get("/", response_model=schemas.CustomerSearchResponse, dependencies=[Depends(security.get_current_active_admin)])
 def read_customers(
@@ -68,8 +99,41 @@ def update_customer(
     customer = crud.customer.get(db=db, id=customer_id)
     if not customer:
         raise HTTPException(status_code=404, detail="Customer not found")
-    customer = crud.customer.update(db=db, db_obj=customer, obj_in=customer_in)
-    return customer
+    
+    try:
+        customer = crud.customer.update(db=db, db_obj=customer, obj_in=customer_in)
+        return customer
+    except IntegrityError as e:
+        db.rollback()
+        error_msg = str(e.orig)
+        
+        # 處理重複的客戶編號
+        if 'tax_id' in error_msg or 'customers.tax_id' in error_msg:
+            tax_id = customer_in.tax_id if hasattr(customer_in, 'tax_id') and customer_in.tax_id else customer.tax_id
+            raise HTTPException(
+                status_code=400,
+                detail=f"客戶編號 '{tax_id}' 已存在，請使用其他編號。"
+            )
+        
+        # 處理重複的 email
+        if 'email' in error_msg or 'customers.email' in error_msg:
+            email = customer_in.email if hasattr(customer_in, 'email') and customer_in.email else customer.email
+            raise HTTPException(
+                status_code=400,
+                detail=f"電子郵件 '{email}' 已被使用，請使用其他電子郵件。"
+            )
+        
+        # 其他完整性錯誤
+        raise HTTPException(
+            status_code=400,
+            detail="更新客戶時發生錯誤，可能是資料重複或格式不正確。"
+        )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"更新客戶時發生錯誤：{str(e)}"
+        )
 
 @router.delete("/{customer_id}", response_model=schemas.Customer, dependencies=[Depends(security.get_current_active_admin)])
 def delete_customer(

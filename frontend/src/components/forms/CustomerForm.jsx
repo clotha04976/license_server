@@ -6,9 +6,10 @@ import {
   DialogActions,
   TextField,
   Button,
+  Alert,
 } from '@mui/material';
 
-function CustomerForm({ open, onClose, onSave, customer }) {
+function CustomerForm({ open, onClose, onSave, customer, error }) {
   const [formData, setFormData] = useState({
     tax_id: '',
     name: '',
@@ -17,6 +18,7 @@ function CustomerForm({ open, onClose, onSave, customer }) {
     address: '',
     notes: '',
   });
+  const [localError, setLocalError] = useState(null);
 
   useEffect(() => {
     if (customer) {
@@ -32,21 +34,42 @@ function CustomerForm({ open, onClose, onSave, customer }) {
       // Reset form for new customer
       setFormData({ tax_id: '', name: '', email: '', phone: '', address: '', notes: '' });
     }
+    // 當表單打開或客戶變更時，清除錯誤
+    setLocalError(null);
   }, [customer, open]);
+
+  useEffect(() => {
+    // 當外部傳入錯誤時，更新本地錯誤狀態
+    setLocalError(error);
+  }, [error]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // 當使用者開始輸入時，清除錯誤
+    if (localError) {
+      setLocalError(null);
+    }
   };
 
-  const handleSubmit = () => {
-    onSave(formData);
+  const handleSubmit = async () => {
+    try {
+      setLocalError(null);
+      await onSave(formData);
+    } catch (err) {
+      // 錯誤由父組件處理，這裡不需要額外處理
+    }
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{customer ? '編輯客戶' : '新增客戶'}</DialogTitle>
       <DialogContent>
+        {localError && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setLocalError(null)}>
+            {localError}
+          </Alert>
+        )}
         <TextField
           autoFocus
           margin="dense"

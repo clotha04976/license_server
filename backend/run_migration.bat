@@ -4,3 +4,4 @@ cd /d "%~dp0"
 python scripts/add_app_version_column.py
 pause
 
+

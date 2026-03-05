@@ -11,3 +11,4 @@ python-multipart
 apscheduler>=3.11.0
 pydantic-settings
 slowapi==0.1.9
+pandas

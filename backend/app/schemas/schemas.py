@@ -194,3 +194,54 @@ class LogListResponse(BaseModel):
     page: int
     limit: int
     total_pages: int
+
+# --- Training Data Schemas ---
+
+class InvoiceData(BaseModel):
+    """單筆發票資料"""
+    invoice_number: str  # 發票號碼
+    invoice_type: str  # 發票類別
+    invoice_date: str  # 發票日期
+    seller_id: Optional[str] = ""  # 承賣人統編
+    buyer_id: Optional[str] = ""  # 買受人統編
+    tax_type: Optional[str] = "1"  # 課稅別
+    deductible: Optional[bool] = True  # 是否折抵
+    sales_amount: Optional[float] = 0  # 金額
+    business_tax: Optional[float] = 0  # 稅額
+    is_fix_asset: Optional[bool] = False  # 是否為固定資產
+    img_path: str  # 圖片路徑
+
+class TrainingDataUploadRequest(BaseModel):
+    """訓練資料上傳請求"""
+    serial_number: str
+    year: int  # 民國年
+    month: int
+    invoices: List[InvoiceData]
+
+class TrainingDataUploadResponse(BaseModel):
+    """訓練資料上傳回應"""
+    status: str
+    message: str
+    uploaded_images: int = 0
+    failed_images: int = 0
+    csv_updated: bool = False
+
+class TrainingDataRecord(BaseModel):
+    """訓練資料上傳記錄"""
+    serial_number: str
+    year: int
+    month: int
+    uploaded_at: datetime
+    last_updated: datetime
+    invoice_count: int
+    customer_id: Optional[int] = None
+    customer_name: Optional[str] = None
+    customer_tax_id: Optional[str] = None
+
+class TrainingDataListResponse(BaseModel):
+    """訓練資料列表回應"""
+    items: List[TrainingDataRecord]
+    total: int
+    page: int
+    limit: int
+    total_pages: int

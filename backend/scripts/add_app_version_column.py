@@ -45,3 +45,4 @@ def add_app_version_column():
 if __name__ == "__main__":
     add_app_version_column()
 
+

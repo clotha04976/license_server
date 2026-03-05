@@ -25,9 +25,14 @@ internal_router = APIRouter()
 # 優先使用環境變數，否則使用預設路徑
 # 在 Docker 容器中，應該使用 /app/logs（對應到主機的 ./backend/logs）
 # 在本地開發時，使用相對路徑 backend/logs
-_default_logs_dir = "/app/logs" if os.path.exists("/app") else str(Path(__file__).parent.parent.parent.parent.parent / "logs")
+# 判斷是否在 Docker 容器中：檢查 /app/app 目錄是否存在（Docker 容器的工作目錄是 /app）
+_is_docker = os.path.exists("/app/app")
+_default_logs_dir = "/app/logs" if _is_docker else str(Path(__file__).parent.parent.parent.parent.parent / "logs")
 LOGS_BASE_DIR = Path(os.getenv("LOGS_DIR", _default_logs_dir))
-logger.info(f"Log 檔案儲存目錄: {LOGS_BASE_DIR}")
+
+# 確保 logs 目錄存在
+LOGS_BASE_DIR.mkdir(parents=True, exist_ok=True)
+logger.info(f"Log 檔案儲存目錄: {LOGS_BASE_DIR} (絕對路徑: {LOGS_BASE_DIR.resolve()}, 存在: {LOGS_BASE_DIR.exists()})")
 
 # 台北時區
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
@@ -77,6 +82,10 @@ async def upload_logs(
     uploaded_files = []
     failed_files = []
     
+    # 確保 log 目錄存在
+    log_dir = get_log_dir(serial_number)
+    logger.info(f"準備上傳檔案到: {log_dir} (絕對路徑: {log_dir.resolve()})")
+    
     for file in files:
         # 驗證檔案類型
         # 支援標準 .log 檔案和帶日期後綴的 .log.YYYY-MM-DD 檔案
@@ -96,14 +105,14 @@ async def upload_logs(
             safe_filename = file.filename.replace('\\', '_').replace('/', '_')
             new_filename = f"{batch_id}_{safe_filename}"
             
-            # 取得儲存目錄
-            log_dir = get_log_dir(serial_number)
+            # 取得儲存目錄（已在前面確保存在）
             file_path = log_dir / new_filename
             
             # 儲存檔案
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
             
+            logger.info(f"成功儲存檔案: {file_path} (大小: {file_path.stat().st_size} bytes)")
             uploaded_files.append(file.filename)
         except Exception as e:
             failed_files.append(f"{file.filename} ({str(e)})")

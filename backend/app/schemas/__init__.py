@@ -8,6 +8,8 @@ from .schemas import (
     Feature, FeatureCreate, FeatureUpdate,
     CustomerSearchParams, CustomerSearchResponse,
     LicenseSearchParams, LicenseSearchResponse,
-    LogFileInfo, LogUploadResponse, LogListResponse
+    LogFileInfo, LogUploadResponse, LogListResponse,
+    InvoiceData, TrainingDataUploadRequest, TrainingDataUploadResponse,
+    TrainingDataRecord, TrainingDataListResponse
 )
 from .event_log import EventLog, EventLogCreate, EventLogUpdate, EventConfirmationRequest

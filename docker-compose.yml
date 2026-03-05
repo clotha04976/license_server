@@ -18,6 +18,8 @@ services:
       - ./backend/requirements.txt:/app/requirements.txt
       # 掛載 logs 目錄，讓 log 檔案可以從主機存取
       - ./backend/logs:/app/logs
+      # 掛載訓練資料目錄，讓訓練資料可以從主機存取
+      - ./backend/dataset_to_train:/app/dataset_to_train
     environment:
       - PYTHONPATH=/app
       - PYTHONUNBUFFERED=1
