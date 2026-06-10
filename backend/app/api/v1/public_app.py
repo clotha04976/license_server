@@ -5,6 +5,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from app.api.v1.endpoints import public
 from app.api.v1.endpoints.logs import public_router as logs_public_router
 from app.api.v1.endpoints.training_data import public_router as training_data_public_router
+from app.api.v1.endpoints.ai_feedback import public_router as ai_feedback_public_router
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi import Request
@@ -28,3 +29,4 @@ public_app.add_middleware(
 public_app.include_router(public.router)
 public_app.include_router(logs_public_router, prefix="/logs", tags=["Logs"])
 public_app.include_router(training_data_public_router, prefix="/training-data", tags=["Training Data"])
+public_app.include_router(ai_feedback_public_router, prefix="/ai-feedback", tags=["AI Feedback"])

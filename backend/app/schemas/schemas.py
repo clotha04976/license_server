@@ -226,6 +226,12 @@ class TrainingDataUploadResponse(BaseModel):
     failed_images: int = 0
     csv_updated: bool = False
 
+class AiFeedbackUploadResponse(BaseModel):
+    """AI 回饋影像上傳回應"""
+    status: str
+    message: str
+    stored_filename: str = ""
+
 class TrainingDataRecord(BaseModel):
     """訓練資料上傳記錄"""
     serial_number: str
